@@ -1,0 +1,92 @@
+
+========================================
+Table 5's orders have been accepted
+
+ORDER DETAILS
+Table No : 5
+Meals : 
+1) 1 Vegetarian Omelette
+2) 4 Bread Pudding
+Total price : 49.99$
+========================================
+
+========================================
+Table 8's orders have been accepted
+
+ORDER DETAILS
+Table No : 8
+Meals : 
+1) 2 Doner
+Total price : 74.86$
+========================================
+
+========================================
+Table 3's orders have not been accepted
+
+ORDER DETAILS
+Table No : 3
+Meals : 
+1) 2 Vegetarian Omelette
+2) 2 Garlic-Butter Brocolli
+Total price : 45.68$
+========================================
+
+========================================
+Table 9's orders have not been accepted
+
+ORDER DETAILS
+Table No : 9
+Meals : 
+1) 6 Vanilla Custard Pie
+2) 5 Doner
+3) 7 Shakshuka
+Total price : 388.24$
+========================================
+
+========================================
+Table 10's orders have not been accepted
+
+ORDER DETAILS
+Table No : 10
+Meals : 
+1) 2 Pancakes
+2) 5 Rice Pudding
+Total price : 93.81$
+========================================
+
+========================================
+Table 2's orders have been accepted
+
+ORDER DETAILS
+Table No : 2
+Meals : 
+1) 3 Pasta Pomodoro
+2) 3 Pancakes
+3) 4 Cinnamon Rolls
+4) 2 Noodle Soup
+Total price : 225.6$
+========================================
+
+========================================
+Table 4's orders have not been accepted
+
+ORDER DETAILS
+Table No : 4
+Meals : 
+1) 6 Doner
+2) 2 Grilled Cheese
+Total price : 267.06$
+========================================
+
+========================================
+Table 7's orders have been accepted
+
+ORDER DETAILS
+Table No : 7
+Meals : 
+1) 1 Shakshuka
+2) 2 Rice And Beans
+3) 2 Fried Rice
+4) 2 Vanilla Custard Pie
+Total price : 175.61$
+========================================

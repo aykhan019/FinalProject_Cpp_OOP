@@ -3,32 +3,15 @@
 #include <Windows.h>
 #include <conio.h>
 #include <string>
+#include <fstream>
 #include "ConsoleHelper.h"
 #include "Color.h" 
 #include "Classes.h"
 #include "CursorFunctions.h"
-#include "Cout.h"
-#include "SearchEngine.h"
+#include "FileHelper.h"
 using namespace std;
 
 #pragma region Setups
-
-#pragma region Tables
-
-Table* table1 = new Table(false, nullptr, 0);
-Table* table2 = new Table(true, nullptr, 0);
-Table* table3 = new Table(false, nullptr, 0);
-Table* table4 = new Table(true, nullptr, 0);
-Table* table5 = new Table(false, nullptr, 0);
-Table* table6 = new Table(false, nullptr, 0);
-Table* table7 = new Table(true, nullptr, 0);
-Table* table8 = new Table(true, nullptr, 0);
-Table* table9 = new Table(false, nullptr, 0);
-Table* table10 = new Table(false, nullptr, 0);
-
-Table** tables = new Table * [10]{ table1,table2,table3,table4,table5,table6,table7,table8,table9,table10 };
-const int table_count = 10;
-#pragma endregion
 
 #pragma region Ingredients
 Ingredient* bread = new Bread("Bread", 0.352, 1.99, 13.16, 69, 1.47);
@@ -98,7 +81,7 @@ RecipeItem** stockIngredients = new RecipeItem* [ingredient_count] { RPbread, RP
 RPbean, RPrice, RPmushroom, RPmeat, RPspices, RPbroccoli, RPcheese, RPtomatoes, RPeggs, RPfreshherbs, RPmilk, RPorange,
 RPpear, RPpotato, RPonion, RPoil, RPflour, RPveggies, RPbutter, RPtoast, RPcinnamon, RPsugar, RPgarlic };
 
-Stock stock(stockIngredients, ingredient_count);
+Stock* stock = new Stock(stockIngredients, ingredient_count);
 #pragma endregion
 
 #pragma region Meals
@@ -257,6 +240,57 @@ Meal* doner = new Doner(donerIngredients, 3, "Doner");
 
 const int meal_count = 20;
 Meal** restaruant_meals = new Meal * [meal_count]{ garlicButterBroccoli, pastaPrimavera, pastaPomodoro, riceAndBeans, grilledCheese, chili, noodleSoup, friedRice, risotto, eggsAndToast, frenchToast, vegetarianOmelette, pancakes, shakshuka, cinnamonRolls, ricePudding, vanillaPudding, vanillaCustardPie, breadPudding, doner };
+#pragma endregion
+
+#pragma region Orders
+Order* order1 = new Order(2, vegetarianOmelette, 2);
+Order* order4 = new Order(2, garlicButterBroccoli, 2);
+Order* order10 = new Order(4, vegetarianOmelette, 1);
+Order* order2 = new Order(4, breadPudding, 4);
+Order* order3 = new Order(7, doner, 2);
+Order* order6 = new Order(8, doner, 5);
+Order* order5 = new Order(8, vanillaCustardPie, 6);
+Order* order7 = new Order(8, shakshuka, 7);
+Order* order8 = new Order(9, pancakes, 2);
+Order* order9 = new Order(9, ricePudding, 5);
+
+Order** table2Orders = new Order * [2]{ order1, order4 };
+Order** table4Orders = new Order * [2]{ order10, order2 };
+Order** table7Orders = new Order * [1]{ order3 };
+Order** table8Orders = new Order * [3]{ order5,order6,order7 };
+Order** table9Orders = new Order * [2]{ order8,order9 };
+#pragma endregion
+
+#pragma region Tables
+
+Table* table0 = new Table(true, nullptr, 0);
+Table* table1 = new Table(false, nullptr, 0);
+Table* table2 = new Table(true, table2Orders, 2);
+Table* table3 = new Table(false, nullptr, 0);
+Table* table4 = new Table(true, table4Orders, 2);
+Table* table5 = new Table(false, nullptr, 0);
+Table* table6 = new Table(false, nullptr, 0);
+Table* table7 = new Table(true, table7Orders, 1);
+Table* table8 = new Table(true, table8Orders, 3);
+Table* table9 = new Table(true, table9Orders, 2);
+
+Table** tables = new Table * [10]{ table0,table1,table2,table3,table4,table5,table6,table7,table8,table9 };
+const int table_count = 10;
+#pragma endregion
+
+#pragma region Kitchen
+Order** orders = new Order * [10]{ order1 , order2, order3, order4, order5, order6, order7,order8, order9, order10};
+Kitchen* kitchen = new Kitchen(restaruant_meals,meal_count, orders, 10);
+#pragma endregion
+
+#pragma region Admins
+Admin* admin1 = new Admin("John","john123");
+Admin* admin2 = new Admin("George","george123");
+Admin** admins = new Admin * [2]{ admin1, admin2 };
+#pragma endregion
+
+#pragma region Restaruant
+Restaruant* restaruant = new Restaruant("John\'s restaruant", "The Corniche, 25 Albert Embankment Lambeth", "London", kitchen, stock, admins, 2, tables, table_count);
 #pragma endregion
 
 #pragma endregion
@@ -790,7 +824,7 @@ void ChooseAdditionalIngredient(Meal*& meal)
 
 }
 
-void ShowOneMealsChoices(Meal*& meal)
+void ShowOneMealsChoices(Meal*& meal, const int& tableNo)
 {
     const int choice_count = 7;
     int Set[choice_count]{};
@@ -928,10 +962,6 @@ void ShowOneMealsChoices(Meal*& meal)
             else if (counter == 6)
                 counter = prev_counter;
         }
-        else // when two buttons pressed together
-        {
-
-        }
         if (key == '\r')
         {
             if (counter == 0)
@@ -947,7 +977,46 @@ void ShowOneMealsChoices(Meal*& meal)
             }
             else if (counter == 2) // See image of the meal
             {
-
+                if (meal->GetName() == "Garlic-Butter Brocolli")
+                    system("start garlicButterBroccoli.png");
+                else if (meal->GetName() == "Pasta Primavera")
+                    system("start pastaPrimavera.jpeg");
+                else if (meal->GetName() == "Pasta Pomodoro")
+                    system("start pastaPomodoro.jpeg");
+                else if (meal->GetName() == "Rice And Beans")
+                    system("start riceAndBeans.png");
+                else if (meal->GetName() == "Grilled Cheese")
+                    system("start grilledCheese.jpeg");
+                else if (meal->GetName() == "Chili")
+                    system("start chili.jpeg");
+                else if (meal->GetName() == "Noodle Soup")
+                    system("start noodleSoup.jpeg");
+                else if (meal->GetName() == "Fried Rice")
+                    system("start friedRice.jpeg");
+                else if (meal->GetName() == "Risotto")
+                    system("start risotto.jpeg");
+                else if (meal->GetName() == "Eggs And Toast")
+                    system("start eggsAndToast.jpeg");
+                else if (meal->GetName() == "French Toast")
+                    system("start frenchToast.jpeg");
+                else if (meal->GetName() == "Vegetarian Omelette")
+                    system("start vegetarianOmelette.jpeg");
+                else if (meal->GetName() == "Pancakes")
+                    system("start pancakes.jpeg");
+                else if (meal->GetName() == "Shakshuka")
+                    system("start shakshuka.jpeg");
+                else if (meal->GetName() == "Cinnamon Rolls")
+                    system("start cinnamonRolls.jpeg");
+                else if (meal->GetName() == "Rice Pudding")
+                    system("start ricePudding.jpeg");
+                else if (meal->GetName() == "Vanilla Pudding")
+                    system("start vanillaPudding.jpeg");
+                else if (meal->GetName() == "Vanilla Custard Pie")
+                    system("start vanillaCustardPie.jpeg");
+                else if (meal->GetName() == "Bread Pudding")
+                    system("start breadPudding.jpeg");
+                else if (meal->GetName() == "Doner")
+                    system("start doner.jpeg");
             }
             else if (counter == 3) // add more ingredient
             {
@@ -960,17 +1029,38 @@ void ShowOneMealsChoices(Meal*& meal)
             }
             else if (counter == 5)
             {
-                m_count++;  
+                if (m_count + 1 < 100)
+                    m_count++;  
             }
             else if (counter == 6) // order 
             {
-
+                if (restaruant->GetStock()->HasEnoughIngredientForMeal(*meal))
+                {
+                    Order* newOrder = new Order(tableNo, meal, m_count);
+                    restaruant->GetKitchen()->AddOrder(*newOrder);
+                    tables[tableNo]->AddOrder(*newOrder);
+                    cout << "\a" << endl;
+                    system("cls");
+                    Zoom(150);
+                    cout << "\nYour meal has been ordered!" << endl;
+                    cout << "\n\n\n  Press any key to go BACK" << endl;
+                    CursorCoordinates(1, 50);
+                    system("pause");
+                    break;
+                }
+                else
+                {
+                    system("cls");
+                    cout << "Sorry, there are not enough ingredients for " << meal->GetName() << endl;
+                    system("pause");
+                    break;
+                }
             }
         }
     }
 }
 
-void ShowAllMealsChoices()
+void ShowAllMealsChoices(const int& tableNo)
 {
     int Set[meal_count + 2]{}; // + "Back" choice + "Search Meal" choice
     int counter = 21;
@@ -1264,7 +1354,7 @@ void ShowAllMealsChoices()
                 if (x == counter)
                 {
                     system("cls");
-                    ShowOneMealsChoices(restaruant_meals[x]);
+                    ShowOneMealsChoices(restaruant_meals[x], tableNo);
                 }
             }
         }
@@ -1592,21 +1682,19 @@ void ShowTableChoices()
 #pragma endregion
 
         SetColor(Set[table_count]);
-        CursorCoordinates(3, 42);
-        /*cout << "============================= " << endl;
-        cout << "   |      /                    | " << endl;
-        cout << "   |     /                     | " << endl;
-        cout << "   |    <-------------------   | " << endl;
-        cout << "   |     \\                     | " << endl;
-        cout << "   |      \\                    | " << endl;
-        cout << "   ============================= " << endl;*/
-        cout << "============================= " << endl;
-        cout << "   |                           | " << endl;
-        cout << "   |        __      __         | " << endl;
-        cout << "   |       |__) /\\ /  |_/      |" << endl;
-        cout << "   |       |__)/--\\\\__| \\      | " << endl;
-        cout << "   |                           | " << endl;
-        cout << "   ============================= " << endl;
+
+        cout << endl;
+        cout << endl;
+        cout << endl;
+        cout << endl;
+        cout << endl;
+        cout << endl;
+        cout << endl;
+        cout << "      ====================== " << endl;
+        cout << "      |                    | " << endl;
+        cout << "      |     <-- BACK       |" << endl;
+        cout << "      |                    | " << endl;
+        cout << "      ====================== " << endl;
 
         key = _getch();
 
@@ -1651,7 +1739,7 @@ void ShowTableChoices()
                 {
                    if (!tables[x]->GetHasClient())
                    {
-                       ShowAllMealsChoices();
+                       ShowAllMealsChoices(x);
                    }
                    else
                    {
@@ -1690,12 +1778,278 @@ void ShowTableChoices()
                                counter += table_count / 2;
                            }
                        }
-
                    }
                 }
             }
         }
     }
+}
+
+void ShowOrdersForKitchen();
+
+void ShowAdminSide()
+{
+    int Set[2]{};
+    int counter = 0;
+    char key;
+
+    HideCursor();
+    while (true)
+    {
+        Zoom(50);
+        Set[0] = RED;
+        Set[1] = RED;
+        if (counter == 0)
+        {
+            Set[counter] = GREEN;
+        }
+        else
+        {
+            Set[counter] = GREEN;
+        }
+
+        system("cls");
+
+        SetColor(Set[0]);
+        cout << endl;
+        cout << "        ___  ____  _____ _________   ______ ____  ____ _________ ____  _____       " << endl;
+        cout << "       |_  ||_  _||_   _|  _   _  |./ ___  |_   ||   _|_   ___  |_   \\|_   _|     " << endl;
+        cout << "         | |_/ /    | | |_/ | | \\_| ./   \\_| | |__| |   | |_  \\_| |   \\ | |    " << endl;
+        cout << "         |  __'.    | |     | |   | |        |  __  |   |  _|  _  | |\\ \\| |      " << endl;
+        cout << "        _| |  \\ \\_ _| |_   _| |_  \\ \\.___.'\\_| |  | |_ _| |___/ |_| |_\\   |_ " << endl;
+        cout << "       |____||____|_____| |_____|  \\._____.'____||____|_________|_____|\\____|    " << endl;
+
+        SetColor(YELLOW);
+        cout << "\n\n\n==============================TO GO BACK PRESS ESC=============================================" << endl;
+
+        SetColor(Set[1]);
+        cout << endl;
+        cout << endl;
+        cout << "                  _______ _________   ____     ______ ___  ____          " << endl;
+        cout << "                 /  ___  |  _   _  |.'    \\. ./ ___  |_  ||_  _|        " << endl;
+        cout << "                |  (__ \\_|_/ | | \\_|  .--.  \\ ./   \\_| | |_/ /       " << endl;
+        cout << "                 '.___\\-.    | |   | |    | | |        |  __'.          " << endl;
+        cout << "                |\\\\____) |  _| |_  \\  \\--'  / \\.___.'\\_| |  \\ \\_ " << endl;
+        cout << "                |_______.' |_____|  \\.____.' \\._____.'____||____|      " << endl;
+
+
+        key = _getch();
+
+        if (key == 72 && counter == 1)
+        {
+            counter--;
+        }
+        if (key == 80 && counter == 0)
+        {
+            counter++;
+        }
+
+        if (key == 27)
+        {
+            break;
+        }
+
+        if (key == '\r')
+        {
+            if (counter == 0)
+            {
+                ShowOrdersForKitchen();
+            }
+            else
+            {
+                system("cls");
+                restaruant->GetStock()->ShowAllIngredients();
+                cout << "\n  Press any key to go BACK . . ." << endl;
+                CursorCoordinates(1, 50);
+                system("pause");
+            }
+        }
+    }
+}
+
+int GetTablesOrderedMealCount()
+{
+    int counter = 0;
+    const int size = 20;
+    bool hasShown[size]{};
+    for (int y = 0; y < size; y++)
+    {
+        hasShown[y] = false;
+    }
+    int length = restaruant->GetKitchen()->GetOrderCount();
+    for (int x = 0; x < length; x++)
+    {
+        int table_no = restaruant->GetKitchen()->GetOrders()[x]->GetTableNo();
+        if (!hasShown[table_no])
+        {
+            hasShown[table_no] = true;
+            counter++;
+        }
+    }
+    return counter;
+}
+
+void ShowOrdersForKitchen()
+{
+    // accept or decline meal
+    // if accept { r4educe ingredinet count } {send message to table that the order has been accepted} {delete order}
+    // else {send message than order has not been accepted, it has been declined } {delete order}
+
+    int counter = 0;
+    char key;
+    const int size = 10;
+    bool hasShown[size]{};
+
+    HideCursor();
+    while (true)
+    {
+        const int order_count = restaruant->GetKitchen()->GetOrderCount();
+        int* Set = new int[order_count] {};
+        int tableCountOrderedMeal = GetTablesOrderedMealCount();
+        system("cls");
+        Zoom(40);
+        if (counter >= tableCountOrderedMeal * 2)
+        {
+            counter = tableCountOrderedMeal * 2 - 2;
+        }
+
+        for (int x = 0; x < order_count; x++)
+        {
+            if (x == counter)
+            {
+                Set[x] = BLUE;
+            }
+            else
+            {
+                Set[x] = YELLOW;
+            }
+        }
+        
+        SetColor(WHITE);
+        if (order_count == 0)
+        {
+            Zoom(150);
+            SetColor(RED);
+            cout << "\n    There is no order :(" << endl;
+            cout << "\n\n    Press ESC to go BACK" << endl;
+        }
+        else
+        {
+            cout << " ============================================= ORDERS =============================================" << endl;
+            int y_coordinate = 3;
+            int index = 0;
+            for (int y = 0; y < size; y++)
+            {
+                hasShown[y] = false;
+            }
+            int length = restaruant->GetKitchen()->GetOrderCount();
+            for (int x = 0; x < length; x++)
+            {
+                int table_no = restaruant->GetKitchen()->GetOrders()[x]->GetTableNo();
+                if (!hasShown[table_no])
+                {
+                    cout << "\n\n ============ TABLE NO " << table_no + 1 << " ============ " << endl;
+
+                    CursorCoordinates(40, y_coordinate);
+                    SetColor(Set[index]);
+                    cout << "ACCEPT " << endl;
+
+                    CursorCoordinates(48, y_coordinate);
+                    SetColor(YELLOW);
+                    cout << "|" << endl;
+
+                    CursorCoordinates(51, y_coordinate);
+                    SetColor(Set[index + 1]);
+                    cout << "DECLINE" << endl;
+
+                    int table_order_count = tables[table_no]->GetOrderCount();
+                    y_coordinate += 3;
+                    y_coordinate += table_order_count;
+
+                    for (int y = 0; y < length; y++)
+                    {
+                        if (restaruant->GetKitchen()->GetOrders()[y]->GetTableNo() == table_no)
+                        {
+                            restaruant->GetKitchen()->GetOrders()[y]->ShowOrder();
+                        }
+                    }
+
+                    hasShown[table_no] = true;
+                    index += 2;
+                }
+            }
+        }
+
+        key = _getch();
+
+        if (order_count != 0)
+        {
+            if (key == 72 && counter > 1) // up
+            {
+                counter -= 2;
+            }
+            if (key == 80 && counter < tableCountOrderedMeal * 2 - 2) // down
+            {
+                counter += 2;
+            }
+            if (key == 77 && counter % 2 == 0) // right
+            {
+                counter++;
+            }
+            if (key == 75 && counter % 2 == 1) // left
+            {
+                counter--;
+            }
+            if (key == '\r')
+            {
+                if (counter % 2 == 0) // Accept
+                {
+                    int orderNo = (counter / 2);
+                    int tableNo = restaruant->GetKitchen()->GetOrders()[orderNo]->GetTableNo();
+                    OrderWriteToFile("Orders.txt", tables[tableNo], true);
+                    restaruant->GetStock()->ReduceIngredientsByTable(tables[tableNo]);
+                    restaruant->GetKitchen()->DeleteOrderByTableNo(tableNo);
+                    cout << "\a" << endl;
+                }
+                else // Decline
+                {
+                    int orderNo = (counter / 2);
+                    int tableNo = restaruant->GetKitchen()->GetOrders()[orderNo]->GetTableNo();
+                    OrderWriteToFile("Orders.txt", tables[tableNo], false);
+                    restaruant->GetKitchen()->DeleteOrderByTableNo(tableNo);
+                    cout << "\a" << endl;
+                }
+            }
+        }
+
+        if (key == 27)
+        {
+            break;
+        }
+    }
+}
+
+bool AdminIdentityVerification()
+{
+    ShowCursor();
+    system("cls");
+    Zoom(60);
+
+    SetColor(AQUA);
+    cout << " =================== ADMIN IDENTITY VERIFICATION =================== " << endl;
+    string name;
+    cout << "\n  Enter your name : ";
+    getline(cin, name);
+
+    string password;
+    cout << "\n  Enter your password : ";
+    getline(cin, password);
+
+    HideCursor();
+    if (restaruant->IsAdmin(name, password))
+        return true;
+
+    return false;
 }
 
 void AdminOrClient()
@@ -1761,7 +2115,16 @@ void AdminOrClient()
             }
             else
             {
-                // Admin Entry
+                if (AdminIdentityVerification())
+                    ShowAdminSide();
+                else
+                {
+                    system("cls");
+                    SetColor(RED);
+                    Zoom(90);
+                    cout << "\n\n\n\n\n\t  Incorrect name or password!" << endl;
+                    Sleep(4000);
+                }
             }
         }
     }
@@ -1770,5 +2133,6 @@ void AdminOrClient()
 void Start()
 {
     FullScreenMode();
+    system("start backgroundMusic.mp3");
     AdminOrClient();
 }

@@ -146,6 +146,7 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="ConsoleHelper.h" />
     <ClInclude Include="CursorFunctions.h" />
+    <ClInclude Include="FileHelper.h" />
     <ClInclude Include="Start.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

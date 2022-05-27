@@ -1,4 +1,5 @@
 #include "Start.h"
+#include "FileHelper.h"
 
 void Run()
 {
@@ -6,9 +7,9 @@ void Run()
 	{
 		Start();
 	}
-	catch (...)
+	catch (const Exception& ex)
 	{
-
+		ExceptionWriteToFile("ErrorFile.txt", ex);
 	}
 }
 

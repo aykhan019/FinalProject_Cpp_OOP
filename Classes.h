@@ -567,11 +567,11 @@ public:
 #pragma endregion
 
 #pragma region Methods
-	bool MealHasThisIngredient(string ingredinet_name) const
+	bool MealHasThisIngredient(string ingredient_name) const
 	{
 		for (int x = 0; x < count; x++)
 		{
-			if (items[x]->GetIngredient()->GetName() == ingredinet_name)
+			if (items[x]->GetIngredient()->GetName() == ingredient_name)
 			{
 				return true;
 			}
@@ -1093,14 +1093,16 @@ class Order
 {
 private:
 	int tableNo;
-	Meal** meals;
+	Meal* meal;
 	int meal_count;
 public:
 #pragma region Constructor
-	Order() = delete;
-	Order(const int& table, Meal**& meals, const int& meal_count)
+	Order() = default;
+	Order(const int& tableNo, Meal*& meal, const int& meal_count)
 	{
-
+		SetTableNo(tableNo);
+		SetMealCount(meal_count);
+		SetMeals(meal);
 	}
 #pragma endregion
 
@@ -1109,9 +1111,9 @@ public:
 	{
 		return tableNo;
 	}
-	Meal** GetMeals() const
+	Meal* GetMeal() const
 	{
-		return meals;
+		return meal;
 	}
 	int GetMealCount() const
 	{
@@ -1124,9 +1126,9 @@ public:
 	{
 		this->tableNo = tableNo;
 	}
-	void SetMeals(Meal**& meals)
+	void SetMeals(Meal*& meal)
 	{
-		this->meals = meals;
+		this->meal = meal;
 	}
 	void SetMealCount(const int& meal_count)
 	{
@@ -1134,14 +1136,13 @@ public:
 	}
 #pragma endregion
 
-#pragma region Deconstructor
-	~Order()
+#pragma region Methods
+	void ShowOrder()
 	{
-		for (int x = 0; x < meal_count; x++)
-		{
-			delete meals[x];
-		}
-		delete[]meals;
+		SetColor(WHITE);
+		cout << "  Order : ";
+		int count = GetMealCount();
+		cout << " " << count << " " << meal->GetName() << endl;
 	}
 #pragma endregion
 };
@@ -1209,6 +1210,62 @@ public:
 	}
 #pragma endregion
 
+#pragma region Methods 
+	void AddOrder(const Order& neworder)
+	{
+		Order** newOrders = new Order * [order_count + 1]{};
+		for (int x = 0; x < order_count; x++)
+		{
+			newOrders[x] = orders[x];
+		}
+		if (order_count != 0)
+		{
+			delete[]orders;
+		}
+		newOrders[order_count] = new Order{ neworder };
+		orders = newOrders;
+		order_count++;
+		newOrders = nullptr;
+	}
+
+	int GetOrderIndexByTableNo(const int& tableNo)
+	{
+		for (int x = 0; x < order_count; x++)
+		{
+			if (orders[x]->GetTableNo() == tableNo)
+			{
+				return x;
+			}
+		}
+		throw InvalidArgumentException("There is no order in table", __FILE__, __LINE__, __DATE__);
+	}
+
+	void DeleteOrderByTableNo(const int& tableNo)
+	{
+		if (order_count > 0)
+		{
+			int index = GetOrderIndexByTableNo(tableNo);
+			Order** newOrders = new Order * [order_count - 1]{};
+			for (int x = 0; x < index; x++)
+			{
+				newOrders[x] = orders[x];
+			}
+			for (int y = index + 1; y < order_count + 1; y++)
+			{
+				newOrders[y - 1] = orders[y];
+			}
+			delete[]orders;
+			orders = newOrders;
+			order_count--;
+			newOrders = nullptr;
+		}
+		else
+		{
+			throw InvalidArgumentException("There is no order to delete", __FILE__, __LINE__, __DATE__);
+		}
+	}
+#pragma endregion
+
 #pragma region Destructor
 	~Table()
 	{
@@ -1259,8 +1316,10 @@ public:
 
 	void ShowAllIngredients() const
 	{
+		cout << " ================================= ALL INGREDIENTS ================================= " << endl;
 		for (int x = 0; x < ingredient_count; x++)
 		{
+			cout << " ";
 			ingredients[x]->Show();
 		}
 	}
@@ -1304,9 +1363,9 @@ public:
 			{
 				new_ingredients[x] = ingredients[x];
 			}
-			for (int y = index + 1; y < ingredient_count - 1; y++)
+			for (int y = index + 1; y < ingredient_count + 1; y++)
 			{
-				new_ingredients[y] = ingredients[y];
+				new_ingredients[y - 1] = ingredients[y];
 			}
 			if (ingredient_count != 0)
 			{
@@ -1349,6 +1408,43 @@ public:
 		}
 		else
 			return true;
+	}
+
+	bool HasEnoughIngredientForMeal(const Meal& meal) const
+	{
+		int ing_count = meal.GetIngredientCount();
+		RecipeItem** items = meal.GetItems(); // ingredinets
+		for (int x = 0; x < ing_count; x++)
+		{
+			int index = GetIngredientIndexByName(items[x]->GetIngredient()->GetName());
+			if (ingredients[index]->GetAmount() - items[x]->GetAmount() < 0)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	void ReduceIngredientsByTable(Table* table)
+	{
+		//orders[x]->GetMealCount()
+		Order** orders = table->GetOrders();
+		int order_count = table->GetOrderCount();
+		for (int x = 0; x < order_count; x++)
+		{
+			int length = orders[x]->GetMeal()->GetIngredientCount();
+			RecipeItem** items = orders[x]->GetMeal()->GetItems(); // ingredients
+			for (int y = 0; y < length; y++)
+			{
+				for (int i = 0; i < ingredient_count; i++)
+				{
+					if (items[y]->GetIngredient()->GetName() == ingredients[i]->GetIngredient()->GetName())
+					{
+						ingredients[i]->SetAmount(ingredients[i]->GetAmount() - orders[x]->GetMealCount() * items[y]->GetAmount());
+					}
+				}
+			}
+		}
 	}
 };
 
@@ -1399,7 +1495,7 @@ public:
 	}
 	void SetMealCount(const int& meal_count)
 	{
-		assert(!meal_count < 0 && "Meal count cannot be less than 0!");
+		assert(meal_count >= 0 && "Meal count cannot be less than 0!");
 		this->meal_count = meal_count;
 	}
 	void SetOrders(Order**& orders)
@@ -1408,8 +1504,113 @@ public:
 	}
 	void SetOrderCount(const int& order_count)
 	{
-		assert(!order_count < 0 && "Order count cannot be less than 0!");
+		assert(order_count >= 0 && "Order count cannot be less than 0!");
 		this->order_count = order_count;
+	}
+#pragma endregion
+
+#pragma region Methods
+	void ShowAllOrders()
+	{
+		cout << "================== ORDERS ==================" << endl;
+		const int size = 20;
+		bool hasShown[size]{};
+		int length = GetOrderCount();
+		for (int x = 0; x < length; x++)
+		{
+			int table_no = orders[x]->GetTableNo();
+			SetColor(WHITE);
+			if (!hasShown[table_no])
+			{
+				cout << "\n ============ TABLE NO " << table_no + 1 << " ============ " << endl;
+				for (int y = 0; y < length; y++)
+				{
+					if (orders[y]->GetTableNo() == table_no)
+					{
+						orders[y]->ShowOrder();
+					}
+				}
+				hasShown[table_no] = true;
+			}
+		}
+	}
+
+	void AddOrder(const Order& neworder)
+	{
+		Order** newOrders = new Order * [order_count + 1]{};
+		for (int x = 0; x < order_count; x++)
+		{
+			newOrders[x] = orders[x];
+		}
+		if (order_count != 0)
+		{
+			delete[]orders;
+		}
+		newOrders[order_count] = new Order{ neworder };
+		orders = newOrders;
+		order_count++;
+		newOrders = nullptr;
+	}
+
+	int GetOrderIndexByTableNo(const int& tableNo)
+	{
+		for (int x = 0; x < order_count; x++)
+		{
+			if (orders[x]->GetTableNo() == tableNo)
+			{
+				return x;
+			}
+		}
+		throw InvalidArgumentException("There is no order in table", __FILE__, __LINE__, __DATE__);
+	}
+
+	int GetOrderCountInTableNo(const int& tableNo)
+	{
+		int counter = 0;
+		for (int x = 0; x < order_count; x++)
+		{
+			if (orders[x]->GetTableNo() == tableNo)
+			{
+				counter++;
+			}
+		}
+		return counter;
+	}
+
+	void DeleteOrderByTableNo(const int& tableNo)
+	{
+		int order_count_table = GetOrderCountInTableNo(tableNo);
+		int i = 0;
+		if (order_count > 0)
+		{
+			while (i < order_count_table)
+			{
+				int index = GetOrderIndexByTableNo(tableNo);
+				Order** newOrders = new Order * [order_count - 1]{};
+				for (int x = 0; x < index; x++)
+				{
+					newOrders[x] = orders[x];
+				}
+				for (int y = index + 1; y < order_count + 1; y++)
+				{
+					newOrders[y - 1] = orders[y];
+				}
+				delete[]orders;
+				orders = newOrders;
+				order_count--;
+				newOrders = nullptr;
+				i++;
+			}
+		}
+		else
+		{
+			throw InvalidArgumentException("There is no order to delete", __FILE__,__LINE__,__DATE__);
+		}
+	}
+
+	void ShowStock(const Stock& stock) const
+	{
+		stock.ShowAllIngredients();
 	}
 #pragma endregion
 
@@ -1428,4 +1629,214 @@ public:
 		delete[]orders;
 	}
 #pragma endregion
+};
+
+class Admin
+{
+private:
+	string name;
+	string password;
+public:
+#pragma region Constructors
+	Admin() = default;
+
+	Admin(const string & name, const string & password)
+	{
+		SetName(name);
+		SetPassword(password);
+	}
+#pragma endregion
+
+#pragma region Getters
+	string GetName() const
+	{
+		return name;
+	}
+	string GetPassword() const
+	{
+		return password;
+	}
+#pragma endregion
+
+#pragma region Setters
+	void SetName(const string& name)
+	{
+		assert(!name.empty() && "Name should be filled!");
+		this->name = name;
+	}
+	void SetPassword(const string& password)
+	{
+		assert(!password.empty() && "Password should be filled!");
+		assert(password.length() >= 6 && "Password length should be at least 6 characters!");
+		this->password = password;
+	}
+#pragma endregion
+
+#pragma region Methods
+	void ShowAdmin() const
+	{
+		cout << "====== ADMIN INFO ======" << endl;
+		cout << "Name : " << GetName() << endl;
+		cout << "Password : ";
+		int length = password.length();
+		for (int x = 0; x < length; x++)
+		{
+			cout << "*";
+		}
+		cout << endl;
+	}
+#pragma endregion
+};
+
+class Restaruant
+{
+private:
+	string name;
+	string address;
+	string city;
+	double budget;
+	Kitchen* kitchen;
+	Stock* stock;
+	Admin** admins;
+	int admin_count;
+	Table** tables;
+	int table_count;
+public:
+#pragma region Constructors
+	Restaruant() = delete;
+
+	Restaruant(const string& name, const string& address, const string& city, Kitchen*& kitchen, Stock*& stock, Admin**& admins, const int& admin_count, Table** tables, const int& tableCount)
+	{
+		SetName(name);
+		SetAddress(address);
+		SetCity(city);
+		SetBudget(0);
+		SetKitchen(kitchen);
+		SetStock(stock);
+		SetAdminCount(admin_count);
+		SetAdmins(admins);
+		SetTables(tables);
+		SetTableCount(tableCount);
+	}
+#pragma endregion
+
+#pragma region Getters
+	string GetName() const
+	{
+		return name;
+	}
+	string GetAddress() const
+	{
+		return address;
+	}
+	string GetCity() const
+	{
+		return city;
+	}
+	double GetBudget() const
+	{
+		return budget;
+	}
+	Kitchen* GetKitchen() const
+	{
+		return kitchen;
+	}
+	Stock* GetStock() const
+	{
+		return stock;
+	}
+	Admin** GetAdmins() const
+	{
+		return admins;
+	}
+	int GetAdminCount() const
+	{
+		return admin_count;
+	}
+	Table** GetTables() const
+	{
+		return tables;
+	}
+	int GetTableCount() const
+	{
+		return table_count;
+	}
+#pragma endregion
+
+#pragma region Setters
+	void SetName(const string& name)
+	{
+		assert(!name.empty() && "Restaruant name should be filled!");
+		this->name = name;
+	}
+	void SetAddress(const string& address)
+	{
+		assert(!address.empty() && "Restaruant address should be filled!");
+		this->address = address;
+	}
+	void SetCity(const string& city)
+	{
+		assert(!city.empty() && "City name should be filled!");
+		this->city = city;
+	}
+	void SetBudget(const double& budget)
+	{
+		assert(budget >= 0 && "Budget cannot be less than 0!");
+		this->budget = budget;
+	}
+	void SetKitchen(Kitchen*& kitchen)
+	{
+		this->kitchen = kitchen;
+	}
+	void SetStock(Stock*& stock)
+	{
+		this->stock = stock;
+	}
+	void SetAdmins(Admin**& admins)
+	{
+		this->admins = admins;
+	}
+	void SetAdminCount(const int& adminCount)
+	{
+		assert(adminCount >= 0 && "Admin count cannot be less than 0!");
+		this->admin_count = adminCount;
+	}
+	void SetTables(Table**& tables)
+	{
+		this->tables = tables;
+	}
+	void SetTableCount(const int& tableCount)
+	{
+		assert(table_count >= 0 && "Table count cannot be less than 0!");
+		this->table_count = table_count;
+	}
+#pragma endregion
+
+#pragma region Methods
+	void ShowRestaruant() const
+	{
+		cout << " ========= RESTARUANT ========= " << endl;
+		cout << " Name : " << GetName() << endl;
+		cout << " Address : " << GetAddress() << endl;
+		cout << " City : " << GetCity() << endl;
+		cout << " Budget : " << GetBudget() << endl;
+	}
+
+	bool IsAdmin(const string& name, const string& password) const
+	{
+		int length = GetAdminCount();
+		for (int x = 0; x < length; x++)
+		{
+			if (admins[x]->GetName() == name)
+			{
+				if (admins[x]->GetPassword() == password)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+#pragma endregion
+
 };
