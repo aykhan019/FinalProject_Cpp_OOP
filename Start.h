@@ -1904,7 +1904,7 @@ void ShowOrdersForKitchen()
     while (true)
     {
         const int order_count = restaruant->GetKitchen()->GetOrderCount();
-        int* Set = new int[order_count] {};
+        int* Set = new int[order_count * 2] {};
         int tableCountOrderedMeal = GetTablesOrderedMealCount();
         system("cls");
         Zoom(40);
@@ -1913,7 +1913,7 @@ void ShowOrdersForKitchen()
             counter = tableCountOrderedMeal * 2 - 2;
         }
 
-        for (int x = 0; x < order_count; x++)
+        for (int x = 0; x < order_count * 2; x++)
         {
             if (x == counter)
             {
@@ -2002,19 +2002,18 @@ void ShowOrdersForKitchen()
             }
             if (key == '\r')
             {
+                int orderNo = (counter / 2);
+                int tableNo = restaruant->GetKitchen()->GetOrders()[orderNo]->GetTableNo();
                 if (counter % 2 == 0) // Accept
                 {
-                    int orderNo = (counter / 2);
-                    int tableNo = restaruant->GetKitchen()->GetOrders()[orderNo]->GetTableNo();
                     OrderWriteToFile("Orders.txt", tables[tableNo], true);
                     restaruant->GetStock()->ReduceIngredientsByTable(tables[tableNo]);
                     restaruant->GetKitchen()->DeleteOrderByTableNo(tableNo);
+                    //restaruant->GetKitchen()->SetOrderCount(restaruant->GetKitchen()->GetOrderCount() - 1);
                     cout << "\a" << endl;
                 }
                 else // Decline
                 {
-                    int orderNo = (counter / 2);
-                    int tableNo = restaruant->GetKitchen()->GetOrders()[orderNo]->GetTableNo();
                     OrderWriteToFile("Orders.txt", tables[tableNo], false);
                     restaruant->GetKitchen()->DeleteOrderByTableNo(tableNo);
                     cout << "\a" << endl;
@@ -2122,8 +2121,10 @@ void AdminOrClient()
                     system("cls");
                     SetColor(RED);
                     Zoom(90);
-                    cout << "\n\n\n\n\n\t  Incorrect name or password!" << endl;
-                    Sleep(4000);
+                    cout << "\n\n\n\n\t  Incorrect name or password!" << endl;
+                    cout << endl << endl;
+                    cout << "         ";
+                    system("pause");
                 }
             }
         }
