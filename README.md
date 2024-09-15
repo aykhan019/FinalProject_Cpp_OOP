@@ -38,6 +38,8 @@ This project is a C++ application that simulates a restaurant management system.
 - `Classes.h`: Contains the class definitions for various components like Menu, Order, etc.
 - `FileHelper.h`: Manages file operations such as reading and writing to order files.
 - `ErrorFile.txt`: Logs errors encountered during execution.
+  
+> **Note:** Since this was one of my first projects, the file structure may not be as organized as more advanced projects. The project files are in a more straightforward arrangement to reflect its early stage of development.
 
 ## Video Demo
 <a href="https://www.youtube.com/watch?v=QGZNLFD7v9c">
