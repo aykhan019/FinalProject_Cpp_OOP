@@ -43,7 +43,7 @@ This project is a C++ application that simulates a restaurant management system.
 
 ## Video Demo
 <a href="https://www.youtube.com/watch?v=QGZNLFD7v9c">
-    <img src="https://media.aykhan.net/thumbnails/projects/c-plus-plus.jpeg" alt="Restaurant Management System Demo" />
+    <img src="https://media.aykhan.net/thumbnails/projects/cpp.jpeg" alt="Restaurant Management System Demo" />
 </a>
 
 
