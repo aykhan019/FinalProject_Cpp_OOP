@@ -40,6 +40,7 @@ This project is a C++ application that simulates a restaurant management system.
 - `ErrorFile.txt`: Logs errors encountered during execution.
 
 ## Video Demo
+[![Restaruant Management System Demo](https://media.aykhan.net/thumbnails/projects/c-plus-plus.jpeg)](https://www.youtube.com/watch?v=QGZNLFD7v9c)
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
